@@ -15,6 +15,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(require('./middleware/cookieParser'));
+// app.use(Auth.createSession);
+
 
 
 app.get('/',
@@ -41,7 +44,7 @@ app.get('/links',
 app.post('/links',
   (req, res, next) => {
     var url = req.body.url;
-    console.log('models: ', models);
+    console.log('models.Links: ', models.Links);
     if (!models.Links.isValidUrl(url)) {
     // send back a 404 if link is not valid
       return res.sendStatus(404);
@@ -49,12 +52,14 @@ app.post('/links',
 
     return models.Links.get({ url })
       .then(link => {
+        console.log('this is link: ', link); // JF
         if (link) {
           throw link;
         }
         return models.Links.getUrlTitle(url);
       })
       .then(title => {
+        console.log('this is title: ', title);
         return models.Links.create({
           url: url,
           title: title,
@@ -62,9 +67,11 @@ app.post('/links',
         });
       })
       .then(results => {
+        console.log('this is results: ', results);
         return models.Links.get({ id: results.insertId });
       })
       .then(link => {
+        console.log('this is link: ', link);
         throw link;
       })
       .error(error => {
@@ -90,9 +97,32 @@ app.get('/signup',
   });
 
 app.post('/signup',
-  (req, res) => {
+  (req, res, next) => {
     console.log(req.body);
     // console.log('try again models');
+    // if the responses sends back an error that the username is already created
+    // //if req.body[username] exists in DATABASE then return ERROR
+    // return models.Users.create(req.body)
+    //   .then(users => {
+    //     res.redirect(301, '/');
+    //   })
+    //   .error(error => {
+    //     res.redirect(301, '/signup');
+    //   });
+  });
+
+app.post('/login',
+  (req, res, next) => {
+    console.log(req.body);
+    // query from the database, the associated password and salt of the user
+    // then compare the input password to the user's password
+    // return models.Users.compare(req.body.username, req.body.password, )
+    //   .then(users => {
+    //     res.redirect(301, '/');
+    //   })
+    //   .error(error => {
+    //     res.redirect(301, '/signup');
+    //   });
   });
 
 // when pressing signup on signup url, it should store the input at username and password into the database
