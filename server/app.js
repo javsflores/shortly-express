@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(require('./middleware/cookieParser'));
-// app.use(Auth.createSession);
+app.use(Auth.createSession);
 
 
 
@@ -99,6 +99,29 @@ app.get('/signup',
 app.post('/signup',
   (req, res, next) => {
     console.log(req.body);
+
+    var username = req.body['username'];
+    var password = req.body['password'];
+
+    return models.Users.get({username})
+      .then(user => {
+        if (user) {
+          throw user;
+        }
+        return models.Users.create({username, password});
+      })
+      .then(results => {
+        return models.Sessions.update({id: req.session.id}, {userId: results.insertId});
+      })
+      .then (user => {
+        res.redirect('/');
+      })
+      .catch (user => {
+        // redirect
+        res.redirect('/signup');
+      });
+
+
     // console.log('try again models');
     // if the responses sends back an error that the username is already created
     // //if req.body[username] exists in DATABASE then return ERROR
