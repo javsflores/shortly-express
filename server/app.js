@@ -120,18 +120,6 @@ app.post('/signup',
         // redirect
         res.redirect('/signup');
       });
-
-
-    // console.log('try again models');
-    // if the responses sends back an error that the username is already created
-    // //if req.body[username] exists in DATABASE then return ERROR
-    // return models.Users.create(req.body)
-    //   .then(users => {
-    //     res.redirect(301, '/');
-    //   })
-    //   .error(error => {
-    //     res.redirect(301, '/signup');
-    //   });
   });
 
 app.post('/login',
